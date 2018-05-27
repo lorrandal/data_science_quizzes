@@ -26,12 +26,10 @@ col_names = ['Age','Workclass','fnlgwt','Education','Education-Num','Marital-Sta
 adult_data.columns = col_names
 adult_test.columns = col_names
 
-#adult_data.iloc[0]
-#adult_data.describe()
 adult_data.shape
 
 #%% ANALYZE
-# How many missing values?
+# How many missing values and in which attributes?
 num_data = adult_data.shape[0]
 for c in col_names:
     num_non = adult_data[c].isin([' ?']).sum()
@@ -47,48 +45,37 @@ for i in adult_data.columns:
     adult_data[i].replace(' ?', np.nan, inplace=True)
     adult_test[i].replace(' ?', np.nan, inplace=True)
 
-
+# remove rows with a missing value
 adult_data.dropna(how='any',inplace=True)
 adult_test.dropna(how='any',inplace=True)
 adult_data.shape
 
 
 # SUMMARY STATISTICS
-# Value_counts for categorical attributes
-adult_data["Workclass"].value_counts()
-adult_data["Education"].value_counts()
-adult_data["Marital-Status"].value_counts()
-adult_data["Occupation"].value_counts()
-adult_data["Relationship"].value_counts()
-adult_data["Race"].value_counts()
-adult_data["Sex"].value_counts()
-adult_data["Country"].value_counts()
+adult_data.head()
 
-# Reduce Country in United-States - Other --> PERCENTUALE DI US?
+# Percentage of people from a Country
+(adult_data["Country"].value_counts() /  adult_data.shape[0]).head()
+
+# Percentage of Races
+(adult_data["Race"].value_counts() / adult_data.shape[0]).head()
+
+# Reduce Country in United-States - Other 
 adult_data.loc[adult_data['Country'] != ' United-States', 'Country'] = ' Other'
 adult_test.loc[adult_test['Country'] != ' United-States', 'Country'] = ' Other'
-#dataset.loc[dataset['country'] == ' United-States', 'country'] = 'US'
-#adult_data.Country.value_counts().plot(kind='bar') #histogram Us - non Us
 
-# Reduce Race in White - Other --> PERCENTUALE DI WHITE?
+# Reduce Race in White - Other 
 adult_data.loc[adult_data['Race'] != ' White', 'Race'] = ' Other'
 adult_test.loc[adult_test['Race'] != ' White', 'Race'] = ' Other'
 
+adult_data.describe()
 
-
-# Binarize Income
+# Convert Income to binary
 adult_data.loc[adult_data['Income'] == ' >50K', 'Income'] = 1
 adult_data.loc[adult_data['Income'] == ' <=50K', 'Income'] = 0
 
-# CONFRONT Education with Education-Num
-#adult_data.drop(labels='Education', axis=1, inplace=True)
-#adult_test.drop(labels='Education', axis=1, inplace=True)
-
 #%% VISULIZATION
-adult_data.Age.plot.hist(bins=18)
-plt.show()
-
-# ALL HISTOGRAMS
+# HISTOGRAMS
 fig = plt.figure(figsize=(20,15))
 cols = 5
 rows = 3
@@ -99,32 +86,21 @@ for i, column in enumerate(adult_data.columns):
         adult_data[column].value_counts().plot(kind="bar", axes=ax)
     else:
         adult_data[column].hist(axes=ax)
+        ax.set_axisbelow(True)
         plt.xticks(rotation="vertical")
 plt.subplots_adjust(hspace=0.7, wspace=0.2)
 
 #%% CORRELATION between non categorical variables
-corr= adult_data.corr()
-fig, ax =plt.subplots(figsize=(15, 15))
-ax.matshow(corr)
-plt.xticks(range(len(corr.columns)),corr.columns)
-plt.yticks(range(len(corr.columns)),corr.columns)
-plt.show()
-
-
-sns.heatmap(adult_data.corr())
-plt.show()
-
-# Calculate the correlation and plot it
-
 sns.heatmap(adult_data.corr(), square=True)
 plt.show()
 
+#%% Education vs Education-Num
+test_1 = adult_data[['Education','Education-Num']]
+test_1 = test_1.groupby('Education', group_keys=False).apply(lambda df: df.sample(1))
+test_1 = test_1.sort_values(by='Education-Num')
+test_1
 
 #%% FIRST FINDING
-#test_1 = adult_data[['Education','Education-Num']]
-#test_1.sort_values(by='Education-Num', inplace=True)
-
-
 total_elements = []
 high_income = []
 labels = []
@@ -132,55 +108,55 @@ labels = []
 education_levels = adult_data.Education.unique()
 for i in education_levels:
     tmp = adult_data.loc[adult_data['Education'] == i]
-    high_income.append(tmp.Income.sum())
+    high_income.append(tmp.Income.sum()) # sum all row with Income = 1 (<50K)
     total_elements.append(tmp.shape[0])
     labels.append(i)
     
-proportion = np.divide(high_income,total_elements)
+proportion = np.divide(high_income, total_elements)*100
 indexes = np.argsort(proportion)
 proportion = proportion[indexes]
 labels = [labels[i] for i in indexes]
 
+labels_bar = np.arange(len(proportion))
 
-
-barra_x_test = np.arange(len(proportion))
-
-plt.bar(barra_x_test, proportion, align='center')
-plt.xticks(barra_x_test, labels, rotation='vertical')
+fig, ax = plt.subplots(1, 1)
+plt.bar(labels_bar, proportion, align='center')
+plt.xticks(labels_bar, labels, rotation='vertical')
+plt.ylabel('% with Income > $ 50K')
+ax.grid(axis='y')
+ax.set_axisbelow(True)
 plt.show()
-#encoded_test_1, _ = number_encode_features(test_1)
-#correlation = encoded_test_1.corr()
-#print(correlation)
 
 #%% SECOND FINDING
-# Plot percentage of occupation per income class
 total_elements = []
 high_income = []
 labels = []
 
-education_levels = adult_data['Marital-Status'].unique()
-for i in education_levels:
+marital_status = adult_data['Marital-Status'].unique()
+for i in marital_status:
     tmp = adult_data.loc[adult_data['Marital-Status'] == i]
-    high_income.append(tmp.Income.sum())
+    high_income.append(tmp.Income.sum()) # sum all row with Income = 1 (<50K)
     total_elements.append(tmp.shape[0])
     labels.append(i)
     
-proportion = np.divide(high_income,total_elements)
+proportion = np.divide(high_income, total_elements)*100
 indexes = np.argsort(proportion)
 proportion = proportion[indexes]
 labels = [labels[i] for i in indexes]
 
+labels_bar = np.arange(len(proportion))
 
-
-barra_x_test = np.arange(len(proportion))
-
-plt.bar(barra_x_test, proportion, align='center')
-plt.xticks(barra_x_test, labels, rotation='vertical')
+fig, ax = plt.subplots(1, 1)
+plt.bar(labels_bar, proportion, align='center')
+plt.xticks(labels_bar, labels, rotation='vertical')
+plt.ylabel('% with Income >50K')
+ax.grid(axis='y')
+ax.set_axisbelow(True)
 plt.show()
 
-
-
 #%% TRANSFORM DATA
+# convert categorical features in nucerical ones
+
 def number_encode_features(df):
     result = df.copy()
     encoders = {}
@@ -194,15 +170,16 @@ def number_encode_features(df):
 encoded_data, _ = number_encode_features(adult_data)
 encoded_test, _ = number_encode_features(adult_test)
 
+encoded_data.head()
 
-
-#%% LEARN FIT
+#%% LEARN (FIT)
 X_train = encoded_data[encoded_data.columns.drop('Income', 'Education')]
 y_train = encoded_data['Income']
 
 X_test = encoded_test[encoded_test.columns.drop('Income', 'Education')]
 y_test = encoded_test['Income']
 
+# Scale the data for a better classification
 scaler = preprocessing.StandardScaler()
 X_train = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
 X_test = pd.DataFrame(scaler.fit_transform(X_test), columns=X_train.columns)
@@ -250,6 +227,7 @@ def plot_confusion_matrix(cm, classes,
     
 accuracy_score = metrics.accuracy_score(y_test, y_pred)
 cm = metrics.confusion_matrix(y_test, y_pred)
+
 # Plot non-normalized confusion matrix
 plt.figure()
 plot_confusion_matrix(cm, classes= ['0', '1'],
@@ -262,7 +240,13 @@ plot_confusion_matrix(cm, classes=['0', '1'], normalize=True,
 
 plt.show()
 
-print(accuracy_score)
+tn, fp, fn, tp = cm.ravel()
+total = adult_test.shape[0]
+precision = tp / (tp + fp)
+specificity = tn / (tn + fp)
 
 
+print('ACC = %f' %accuracy_score)
+print('Precision = %f' %precision)
+print('Specificity = %f' %specificity)
 
