@@ -6,7 +6,10 @@ QUIZ 2
 
 Implement a solution to the following problem
 
-Imagine there is a country in which couples only want boys. Couples continue to have children until they have their first boy. If they get a boy, they stop getting children. What is the long-term ratio of boys to girls in the country?
+Imagine there is a country in which couples only want boys.
+Couples continue to have children until they have their first boy.
+If they get a boy, they stop getting children. 
+What is the long-term ratio of boys to girls in the country?
 
 """
 import random

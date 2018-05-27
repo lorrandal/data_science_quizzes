@@ -4,7 +4,8 @@ DATA SCIENCE QUIZZES
 
 QUIZ 1
 
-Create a list of numbers with the following properties: 1) Minimum 100 distinct values, 2) the Mean of all values is 1000 (+/- 0.5), 3) the standard Deviation is 10 (+/- 0.1) 
+Create a list of numbers with the following properties: 1) Minimum 100 distinct values,
+2) the Mean of all values is 1000 (+/- 0.5), 3) the standard Deviation is 10 (+/- 0.1) 
 
 """
 import numpy as np
