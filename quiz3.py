@@ -4,6 +4,13 @@
 DATA SCIENCES QUIZZES
 
 QUIZ 3
+
+Using the data set http://archive.ics.uci.edu/ml/datasets/Adult:
+
+  - Explore the data and visualize and explain two interesting findings of your choice
+    
+  - Build a linear model to predict wether a person makes over 50K a year
+
 """
 import numpy as np
 import pandas as pd
